@@ -54,9 +54,7 @@ void entrypoint() {
     foreach (ref file; fileList.files) {
         if (file.name == "opt/dev.pitust.stivalebios.fullbin") {
             printf("Found the stage3/fullbin! size={hex}, select={hex}", file.size, file.select);
-            printf("[p]data: {hex}", *cast(ushort*)0x0000000000100010);
             fw_read(file.select, file.size, cast(void*)0x10_0000);
-            printf("[v]data: {hex}", *cast(ushort*)0x0000000000100010);
         } else {
             printf("Name: {} size={hex}", file.name, file.size);
         }
@@ -66,8 +64,6 @@ void entrypoint() {
         printf("Fullbin loaded correctly!");
         printf("Should branch to: {ptr}", fullbin_supposed_location[1]);
         ulong target = fullbin_supposed_location[1];
-        printf("data there: {hex}", *cast(ushort*)target);
-        while (1) {}
         asm {
             mov RAX, target;
             mov RDI, 0; // boot_mode_has_stack

@@ -10,6 +10,7 @@ uint readpci(uint bus, uint slot, uint func, uint offset) {
 }
 
 void writepci(uint bus, uint slot, uint func, uint offset, uint value) {
+    assert(offset & 3 == 0, "What the fuck are you doing");
     uint address = (bus << 16) | (slot << 11) | (func << 8) | offset | (0x80000000U);
 
     outl(0xCF8, address);
@@ -17,12 +18,14 @@ void writepci(uint bus, uint slot, uint func, uint offset, uint value) {
 }
 
 ubyte readpcibyte(uint bus, uint slot, uint func, uint offset) {
+    assert(offset & 3 == 0, "What the fuck are you doing");
     uint address = (bus << 16) | (slot << 11) | (func << 8) | offset | (0x80000000U);
     outl(0xCF8, address);
     return inb(0xCFC);
 }
 
 void writepcibyte(uint bus, uint slot, uint func, uint offset, ubyte value) {
+    assert(offset & 3 == 0, "What the fuck are you doing");
     uint address = (bus << 16) | (slot << 11) | (func << 8) | offset | (0x80000000U);
 
     outl(0xCF8, address);

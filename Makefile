@@ -19,16 +19,16 @@ bin/bios_stage1.bin: bios_stage1.s bin/bios_stage2.bin
 
 bin/.objects_trampoline: $(D_SRCS_TRAMPOLINE_ONLY) $(D_SRCS_COMMON)
 	@echo LDC2 'build/stivalebios.{common,trampoline}.*.o'
-	@mkdir -p build/trampoline
+	@mkdir -p build/trampoline bin
 	@ldc2 --float-abi=soft -code-model=kernel -mtriple x86_64-elf \
 		-O0 --frame-pointer=all -betterC -c $(D_SRCS_TRAMPOLINE_ONLY) $(D_SRCS_COMMON) -od=build/trampoline -oq \
 		-g --d-debug -mattr=-sse,-sse2,-sse3,-ssse3 --disable-red-zone
 	@touch bin/.objects_trampoline
 
-bin/.objects_full: $(D_SRCS_FULL) $(D_SRCS_COMMON) $(D_SRCS_FULL)
+bin/.objects_full: $(D_SRCS_FULL)
 	@echo LDC2 'build/stivalebios.*.o'
-	@mkdir -p build/full
-	ldc2 --float-abi=soft -code-model=kernel -mtriple x86_64-elf \
+	@mkdir -p build/full bin
+	@ldc2 --float-abi=soft -code-model=kernel -mtriple x86_64-elf \
 		-O0 --frame-pointer=all -betterC -c $(D_SRCS_FULL) -od=build/full -oq \
 		-g --d-debug -mattr=-sse,-sse2,-sse3,-ssse3 --disable-red-zone
 	@touch bin/.objects_full
@@ -42,11 +42,14 @@ bin/bios_stage3.bin: bin/bios_stage3.elf
 bin/bios_stage2.elf: bios_stage2.s trampoline.ld bin/.objects_trampoline
 	@echo AS bin/bios_stage2_ldr.o
 	@nasm -felf64 bios_stage2.s -o bin/bios_stage2_ldr.o
-	@mkdir -p build
+	@mkdir -p build bin
 	@ld.lld -T trampoline.ld bin/bios_stage2_ldr.o `echo build/trampoline/*` -o bin/bios_stage2.elf
 
 bin/bios_stage3.elf: bios_stage3.s stage3.ld bin/.objects_full
 	@echo AS bin/bios_stage3_ldr.o
 	@nasm -felf64 bios_stage3.s -o bin/bios_stage3_ldr.o
-	@mkdir -p build
+	@mkdir -p build bin
 	@ld.lld -T stage3.ld bin/bios_stage3_ldr.o `echo build/full/*` -o bin/bios_stage3.elf
+
+clean:
+	rm -rf bin build
